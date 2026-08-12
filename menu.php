@@ -1,10 +1,18 @@
 <?php
 include("check-login.php");
+include_once("module-settings-utils.php");
 include_once("student-chat-utils.php");
 $_ShowHouseMasterLinks = false;
 $_ShowSeniorHouseLinks = false;
 $_HomeLink = "index.php";
 $_StudentChatEnabledForMenu = student_chat_is_enabled($con);
+$_ModuleBoardingHouses = school_module_is_enabled($con, 'boarding_houses');
+$_ModuleWaecAnalysis = school_module_is_enabled($con, 'waec_analysis');
+$_ModuleCourseRegistration = school_module_is_enabled($con, 'course_registration');
+$_ModuleDepartments = school_module_is_enabled($con, 'departments');
+$_ModuleOnlineVoting = school_module_is_enabled($con, 'online_voting');
+$_ModuleStudentChat = school_module_is_enabled($con, 'student_chat');
+$_ModuleTransport = school_module_is_enabled($con, 'transport');
 if(isset($_SESSION['ACCESSLEVEL'], $_SESSION['SYSTEMTYPE']) &&
    $_SESSION['ACCESSLEVEL'] === "user" &&
    $_SESSION['SYSTEMTYPE'] === "Teacher"){
@@ -296,25 +304,25 @@ elseif($_SESSION['ACCESSLEVEL']=="user" && $_SESSION['SYSTEMTYPE']=="Teacher"){
 <div id="admin" align="left" style="margin-top:5px;">
 <a href="edit-account.php"><button><i class="fa fa-user" style="color:brown"></i> Edit Profile</button></a>
 <?php
-if($_ShowHouseMasterLinks){
+        if($_ModuleBoardingHouses && $_ShowHouseMasterLinks){
 ?>
 <a href="house-master-dashboard.php"><button><i class="fa fa-home" style="color:teal"></i> <?php echo htmlspecialchars($_HouseMasterDashboardLabel, ENT_QUOTES, "UTF-8"); ?></button></a>
 <?php
 }
-if($_ShowExeatManagerLinks){
+        if($_ModuleBoardingHouses && $_ShowExeatManagerLinks){
 ?>
 <a href="house-master-exeat.php"><button><i class="fa fa-check" style="color:teal"></i> House Exeat Management</button></a>
 <?php
 }
-if($_ShowSeniorHouseLinks){
+        if($_ModuleBoardingHouses && $_ShowSeniorHouseLinks){
 ?>
 <a href="senior-house-dashboard.php"><button><i class="fa fa-dashboard" style="color:teal"></i> Senior House Dashboard</button></a>
 <?php
 }
 ?>
 <a href="lesson-timetable-report.php"><button><i class="fa fa-calendar" style="color:#0f766e"></i> Lesson Timetable</button></a>
-<a href="teacher-course-registration.php"><button><i class="fa fa-list-alt" style="color:#1d4ed8"></i> Course Registration</button></a>
-<a href="online-voting.php"><button><i class="fa fa-trophy" style="color:#d97706"></i> Online Voting</button></a>
+<?php if($_ModuleCourseRegistration){ ?><a href="teacher-course-registration.php"><button><i class="fa fa-list-alt" style="color:#1d4ed8"></i> Course Registration</button></a><?php } ?>
+<?php if($_ModuleOnlineVoting){ ?><a href="online-voting.php"><button><i class="fa fa-trophy" style="color:#d97706"></i> Online Voting</button></a><?php } ?>
 <?php if($_ShowTeacherAttendanceLinks){ ?>
 <a href="student-attendance.php"><button><i class="fa fa-check-square-o" style="color:#0f766e"></i> Student Attendance</button></a>
 <a href="student-attendance-report.php"><button><i class="fa fa-bar-chart" style="color:#0f766e"></i> Attendance Summary</button></a>
@@ -341,14 +349,14 @@ elseif($_SESSION['ACCESSLEVEL']=="user" && $_SESSION['SYSTEMTYPE']=="Student"){
 <a href="account-statements.php"><button><i class="fa fa-money" style="color:#16a34a"></i> Account Statement</button></a>
 <a href="examinationtimetablereport.php"><button><i class="fa fa-calendar" style="color:#7c3aed"></i> Exam Timetable</button></a>
 <a href="lesson-timetable-report.php"><button><i class="fa fa-clock-o" style="color:#0f766e"></i> Lesson Timetable</button></a>
-<a href="student-course-registration.php"><button><i class="fa fa-list-alt" style="color:#1d4ed8"></i> Course Registration</button></a>
+<?php if($_ModuleCourseRegistration){ ?><a href="student-course-registration.php"><button><i class="fa fa-list-alt" style="color:#1d4ed8"></i> Course Registration</button></a><?php } ?>
 <a href="student-attendance-report.php"><button><i class="fa fa-bar-chart" style="color:#0f766e"></i> My Attendance</button></a>
-<a href="online-voting.php"><button><i class="fa fa-trophy" style="color:#d97706"></i> Online Voting</button></a>
+<?php if($_ModuleOnlineVoting){ ?><a href="online-voting.php"><button><i class="fa fa-trophy" style="color:#d97706"></i> Online Voting</button></a><?php } ?>
 <a href="messages.php"><button><i class="fa fa-comments" style="color:#ea580c"></i> Message Box</button></a>
-<?php if($_StudentChatEnabledForMenu){ ?>
+<?php if($_ModuleStudentChat && $_StudentChatEnabledForMenu){ ?>
 <a href="student-chat.php"><button><i class="fa fa-user-plus" style="color:#0f766e"></i> Student Chat</button></a>
 <?php } ?>
-<a href="student-exeat-request.php"><button><i class="fa fa-file" style="color:teal"></i> Request Exeat</button></a>
+<?php if($_ModuleBoardingHouses){ ?><a href="student-exeat-request.php"><button><i class="fa fa-file" style="color:teal"></i> Request Exeat</button></a><?php } ?>
 <a href="logout.php"><button><i class="fa fa-power-off" style="color:red"></i> Logout </button></a>
 </div>
 <?php
@@ -363,11 +371,11 @@ elseif($_SESSION['ACCESSLEVEL']=="user" && $_SESSION['SYSTEMTYPE']=="Headmaster"
 <a href="continuing-students.php"><button><i class="fa fa-users" style="color:#2563eb"></i> Continuing Students</button></a>
 <a href="viewusers.php"><button><i class="fa fa-users" style="color:#1d4ed8"></i> Teachers List</button></a>
 <a href="duty-roster.php"><button><i class="fa fa-calendar-check-o" style="color:#0f766e"></i> Teacher On Duty</button></a>
-<a href="senior-house-dashboard.php"><button><i class="fa fa-shield" style="color:#0f766e"></i> Senior House Overview</button></a>
+<?php if($_ModuleBoardingHouses){ ?><a href="senior-house-dashboard.php"><button><i class="fa fa-shield" style="color:#0f766e"></i> Senior House Overview</button></a><?php } ?>
 <a href="student-attendance-report.php"><button><i class="fa fa-bar-chart" style="color:#0f766e"></i> Attendance Summary</button></a>
 <a href="terminal-report.php"><button><i class="fa fa-file-text-o" style="color:#d97706"></i> Examination Report</button></a>
 <a href="internal-exam-analysis.php"><button><i class="fa fa-bar-chart" style="color:#0f766e"></i> Internal Exams Analysis</button></a>
-<a href="waec-analysis.php"><button><i class="fa fa-line-chart" style="color:#1d4ed8"></i> WAEC Analysis</button></a>
+<?php if($_ModuleWaecAnalysis){ ?><a href="waec-analysis.php"><button><i class="fa fa-line-chart" style="color:#1d4ed8"></i> WAEC Analysis</button></a><?php } ?>
 <a href="lesson-timetable-report.php"><button><i class="fa fa-calendar" style="color:#0f766e"></i> Lesson Timetable</button></a>
 <a href="online-admission-admin.php"><button><i class="fa fa-globe" style="color:#0ea5e9"></i> Online Admission</button></a>
 <a href="messages.php"><button><i class="fa fa-comments" style="color:#ea580c"></i> Message Box</button></a>
@@ -392,17 +400,17 @@ elseif($_SESSION['ACCESSLEVEL']=="user" && $_SESSION['SYSTEMTYPE']=="AssistantHe
 <a href="student-attendance-report.php"><button><i class="fa fa-bar-chart" style="color:#0f766e"></i> Attendance Summary</button></a>
 <a href="terminal-report.php"><button><i class="fa fa-file-text-o" style="color:#d97706"></i> Examination Report</button></a>
 <a href="report-approval-board.php"><button><i class="fa fa-check-circle" style="color:#0f766e"></i> Report Approval</button></a>
-<a href="department-management.php"><button><i class="fa fa-sitemap" style="color:#7c3aed"></i> Departments & HOD Setup</button></a>
+<?php if($_ModuleDepartments){ ?><a href="department-management.php"><button><i class="fa fa-sitemap" style="color:#7c3aed"></i> Departments & HOD Setup</button></a>
 <a href="department-team-management.php"><button><i class="fa fa-users" style="color:#7c3aed"></i> Manage Department Teams</button></a>
-<a href="department-bulk-assignment.php"><button><i class="fa fa-list-check" style="color:#7c3aed"></i> Bulk Department Assignment</button></a>
-<a href="transport-management.php"><button><i class="fa fa-bus" style="color:#0f766e"></i> Transport Management</button></a>
-<a href="transport-student-assignment.php"><button><i class="fa fa-map-marker" style="color:#0f766e"></i> Student Transport Assignment</button></a>
-<a href="department-result-approval.php"><button><i class="fa fa-check-square-o" style="color:#0f766e"></i> Department Result Approval</button></a>
+<a href="department-bulk-assignment.php"><button><i class="fa fa-list-check" style="color:#7c3aed"></i> Bulk Department Assignment</button></a><?php } ?>
+<?php if($_ModuleTransport){ ?><a href="transport-management.php"><button><i class="fa fa-bus" style="color:#0f766e"></i> Transport Management</button></a>
+<a href="transport-student-assignment.php"><button><i class="fa fa-map-marker" style="color:#0f766e"></i> Student Transport Assignment</button></a><?php } ?>
+<?php if($_ModuleDepartments){ ?><a href="department-result-approval.php"><button><i class="fa fa-check-square-o" style="color:#0f766e"></i> Department Result Approval</button></a><?php } ?>
 <a href="internal-exam-analysis.php"><button><i class="fa fa-bar-chart" style="color:#0f766e"></i> Internal Exams Analysis</button></a>
-<a href="waec-analysis.php"><button><i class="fa fa-line-chart" style="color:#1d4ed8"></i> WAEC Analysis</button></a>
+<?php if($_ModuleWaecAnalysis){ ?><a href="waec-analysis.php"><button><i class="fa fa-line-chart" style="color:#1d4ed8"></i> WAEC Analysis</button></a><?php } ?>
 <a href="lesson-timetable-report.php"><button><i class="fa fa-calendar" style="color:#0f766e"></i> Lesson Timetable</button></a>
 <a href="examinationtimetablereport.php"><button><i class="fa fa-book" style="color:#7c3aed"></i> Exam Time Table Report</button></a>
-<a href="course-registration-admin.php"><button><i class="fa fa-list-alt" style="color:#1d4ed8"></i> Course Registration</button></a>
+<?php if($_ModuleCourseRegistration){ ?><a href="course-registration-admin.php"><button><i class="fa fa-list-alt" style="color:#1d4ed8"></i> Course Registration</button></a><?php } ?>
 <a href="messages.php"><button><i class="fa fa-comments" style="color:#ea580c"></i> Message Box</button></a>
 <a href="notification.php"><button><i class="fa fa-bullhorn" style="color:#b45309"></i> Send Notification</button></a>
 <a href="logout.php"><button><i class="fa fa-power-off" style="color:red"></i> Logout </button></a>
@@ -415,6 +423,7 @@ elseif($_SESSION['ACCESSLEVEL']=="administrator" && $_SESSION['SYSTEMTYPE']=="no
 <div id="admin" align="left" style="margin-top:5px;">
 <a href="edit-account.php"><button><i class="fa fa-user" style="color:brown"></i> Edit Profile</button></a>
 <a href="user-management.php"><button><i class="fa fa-users" style="color:#1d4ed8"></i> User Management</button></a>
+<a href="module-settings.php"><button><i class="fa fa-toggle-on" style="color:#7c3aed"></i> Module Visibility</button></a>
 <a href="user-visit-history.php"><button><i class="fa fa-clock-o" style="color:#0f766e"></i> User Visit History</button></a>
 <a href="register-student.php"><button><i class="fa fa-user" style="color:royalblue"></i> Register Student</button></a>
 <a href="register-teacher.php"><button><i class="fa fa-user" style="color:royalblue"></i> Register Teacher</button></a>
@@ -424,29 +433,29 @@ elseif($_SESSION['ACCESSLEVEL']=="administrator" && $_SESSION['SYSTEMTYPE']=="no
 <a href="duty-roster.php"><button><i class="fa fa-calendar-check-o" style="color:#0f766e"></i> Duty Roster</button></a>
 <a href="lesson-timetable.php"><button><i class="fa fa-calendar" style="color:#0f766e"></i> Lesson Timetable Entry</button></a>
 <a href="lesson-timetable-report.php"><button><i class="fa fa-book" style="color:#0f766e"></i> Lesson Timetable Report</button></a>
-<a href="course-registration-admin.php"><button><i class="fa fa-list-alt" style="color:#1d4ed8"></i> Course Registration</button></a>
+<?php if($_ModuleCourseRegistration){ ?><a href="course-registration-admin.php"><button><i class="fa fa-list-alt" style="color:#1d4ed8"></i> Course Registration</button></a><?php } ?>
 <a href="report-approval-board.php"><button><i class="fa fa-check-circle" style="color:#0f766e"></i> Report Approval</button></a>
-<a href="department-management.php"><button><i class="fa fa-sitemap" style="color:#7c3aed"></i> Departments & HOD Setup</button></a>
+<?php if($_ModuleDepartments){ ?><a href="department-management.php"><button><i class="fa fa-sitemap" style="color:#7c3aed"></i> Departments & HOD Setup</button></a>
 <a href="department-team-management.php"><button><i class="fa fa-users" style="color:#7c3aed"></i> Manage Department Teams</button></a>
-<a href="department-bulk-assignment.php"><button><i class="fa fa-list-check" style="color:#7c3aed"></i> Bulk Department Assignment</button></a>
-<a href="transport-management.php"><button><i class="fa fa-bus" style="color:#0f766e"></i> Transport Management</button></a>
-<a href="transport-student-assignment.php"><button><i class="fa fa-map-marker" style="color:#0f766e"></i> Student Transport Assignment</button></a>
-<a href="department-result-approval.php"><button><i class="fa fa-check-square-o" style="color:#0f766e"></i> Department Result Approval</button></a>
+<a href="department-bulk-assignment.php"><button><i class="fa fa-list-check" style="color:#7c3aed"></i> Bulk Department Assignment</button></a><?php } ?>
+<?php if($_ModuleTransport){ ?><a href="transport-management.php"><button><i class="fa fa-bus" style="color:#0f766e"></i> Transport Management</button></a>
+<a href="transport-student-assignment.php"><button><i class="fa fa-map-marker" style="color:#0f766e"></i> Student Transport Assignment</button></a><?php } ?>
+<?php if($_ModuleDepartments){ ?><a href="department-result-approval.php"><button><i class="fa fa-check-square-o" style="color:#0f766e"></i> Department Result Approval</button></a><?php } ?>
 <a href="online-admission-admin.php"><button><i class="fa fa-globe" style="color:#0ea5e9"></i> Online Admission</button></a>
-<a href="online-voting-admin.php"><button><i class="fa fa-trophy" style="color:#d97706"></i> Online Voting</button></a>
-<a href="student-chat-monitor.php"><button><i class="fa fa-eye" style="color:#0f766e"></i> Student Chat Monitor</button></a>
-<a href="student-chat-settings.php"><button><i class="fa fa-sliders" style="color:#0f766e"></i> Student Chat Control</button></a>
+<?php if($_ModuleOnlineVoting){ ?><a href="online-voting-admin.php"><button><i class="fa fa-trophy" style="color:#d97706"></i> Online Voting</button></a><?php } ?>
+<?php if($_ModuleStudentChat){ ?><a href="student-chat-monitor.php"><button><i class="fa fa-eye" style="color:#0f766e"></i> Student Chat Monitor</button></a>
+<a href="student-chat-settings.php"><button><i class="fa fa-sliders" style="color:#0f766e"></i> Student Chat Control</button></a><?php } ?>
 <a href="payments.php"><button><i class="fa fa-credit-card" style="color:#16a34a"></i> Payments</button></a>
 <a href="teacher-billing-assignment.php"><button><i class="fa fa-users" style="color:#16a34a"></i> Teacher Billing Assignment</button></a>
-<a href="house-entry.php"><button><i class="fa fa-home" style="color:teal"></i> House Entry</button></a>
+<?php if($_ModuleBoardingHouses){ ?><a href="house-entry.php"><button><i class="fa fa-home" style="color:teal"></i> House Entry</button></a>
 <a href="house-master-assignment.php"><button><i class="fa fa-plus" style="color:teal"></i> House Master Assignment</button></a>
 <a href="student-house-assignment.php"><button><i class="fa fa-users" style="color:teal"></i> Student House Assignment</button></a>
 <a href="senior-house-assignment.php"><button><i class="fa fa-star" style="color:teal"></i> Senior House Assignment</button></a>
-<a href="senior-house-dashboard.php"><button><i class="fa fa-dashboard" style="color:teal"></i> Senior House Dashboard</button></a>
+<a href="senior-house-dashboard.php"><button><i class="fa fa-dashboard" style="color:teal"></i> Senior House Dashboard</button></a><?php } ?>
 
 
 <a href="upload-register.php"><button><i class="fa fa-upload" style="color:blue"></i> Upload Registers</button></a>
-<a href="waec-analysis.php"><button><i class="fa fa-line-chart" style="color:teal"></i> WAEC Analysis</button></a>
+<?php if($_ModuleWaecAnalysis){ ?><a href="waec-analysis.php"><button><i class="fa fa-line-chart" style="color:teal"></i> WAEC Analysis</button></a><?php } ?>
 
 <a href="viewusers.php"><button><i class="fa fa-user" style="color:royalblue"></i> View Teachers</button></a>
 <a href="viewstudents.php"><button><i class="fa fa-user" style="color:royalblue"></i> View Students</button></a>
@@ -460,6 +469,7 @@ elseif($_SESSION['ACCESSLEVEL']=="administrator" && $_SESSION['SYSTEMTYPE']=="su
 <div id="admin" align="left" style="margin-top:5px;">
 <a href="edit-account.php"><button><i class="fa fa-user" style="color:brown"></i> Edit Profile</button></a>
 <a href="user-management.php"><button ><i class="fa fa-users" style="color:#1d4ed8"></i> User Management</button></a>
+<a href="module-settings.php"><button><i class="fa fa-toggle-on" style="color:#7c3aed"></i> Module Visibility</button></a>
 <a href="user-visit-history.php"><button><i class="fa fa-clock-o" style="color:#0f766e"></i> User Visit History</button></a>
 <a href="register-student.php"><button><i class="fa fa-user" style="color:royalblue"></i> Register Student</button></a>
 <a href="register-teacher.php"><button><i class="fa fa-user" style="color:royalblue"></i> Register Teacher</button></a>
@@ -469,22 +479,22 @@ elseif($_SESSION['ACCESSLEVEL']=="administrator" && $_SESSION['SYSTEMTYPE']=="su
 <a href="duty-roster.php"><button><i class="fa fa-calendar-check-o" style="color:#0f766e"></i> Duty Roster</button></a>
 <a href="lesson-timetable.php"><button><i class="fa fa-calendar" style="color:#0f766e"></i> Lesson Timetable Entry</button></a>
 <a href="lesson-timetable-report.php"><button><i class="fa fa-book" style="color:#0f766e"></i> Lesson Timetable Report</button></a>
-<a href="course-registration-admin.php"><button><i class="fa fa-list-alt" style="color:#1d4ed8"></i> Course Registration</button></a>
+<?php if($_ModuleCourseRegistration){ ?><a href="course-registration-admin.php"><button><i class="fa fa-list-alt" style="color:#1d4ed8"></i> Course Registration</button></a><?php } ?>
 <a href="report-approval-board.php"><button><i class="fa fa-check-circle" style="color:#0f766e"></i> Report Approval</button></a>
 <a href="online-admission-admin.php"><button><i class="fa fa-globe" style="color:#0ea5e9"></i> Online Admission</button></a>
-<a href="online-voting-admin.php"><button><i class="fa fa-trophy" style="color:#d97706"></i> Online Voting</button></a>
-<a href="student-chat-monitor.php"><button><i class="fa fa-eye" style="color:#0f766e"></i> Student Chat Monitor</button></a>
-<a href="student-chat-settings.php"><button><i class="fa fa-sliders" style="color:#0f766e"></i> Student Chat Control</button></a>
+<?php if($_ModuleOnlineVoting){ ?><a href="online-voting-admin.php"><button><i class="fa fa-trophy" style="color:#d97706"></i> Online Voting</button></a><?php } ?>
+<?php if($_ModuleStudentChat){ ?><a href="student-chat-monitor.php"><button><i class="fa fa-eye" style="color:#0f766e"></i> Student Chat Monitor</button></a>
+<a href="student-chat-settings.php"><button><i class="fa fa-sliders" style="color:#0f766e"></i> Student Chat Control</button></a><?php } ?>
 <a href="payments.php"><button><i class="fa fa-credit-card" style="color:#16a34a"></i> Payments</button></a>
 <a href="teacher-billing-assignment.php"><button><i class="fa fa-users" style="color:#16a34a"></i> Teacher Billing Assignment</button></a>
-<a href="house-entry.php"><button><i class="fa fa-home" style="color:teal"></i> House Entry</button></a>
+<?php if($_ModuleBoardingHouses){ ?><a href="house-entry.php"><button><i class="fa fa-home" style="color:teal"></i> House Entry</button></a>
 <a href="house-master-assignment.php"><button><i class="fa fa-plus" style="color:teal"></i> House Master Assignment</button></a>
 <a href="student-house-assignment.php"><button><i class="fa fa-users" style="color:teal"></i> Student House Assignment</button></a>
 <a href="senior-house-assignment.php"><button><i class="fa fa-star" style="color:teal"></i> Senior House Assignment</button></a>
-<a href="senior-house-dashboard.php"><button><i class="fa fa-dashboard" style="color:teal"></i> Senior House Dashboard</button></a>
+<a href="senior-house-dashboard.php"><button><i class="fa fa-dashboard" style="color:teal"></i> Senior House Dashboard</button></a><?php } ?>
 
 <a href="upload-register.php"><button><i class="fa fa-upload" style="color:blue"></i> Upload Registers</button></a>
-<a href="waec-analysis.php"><button><i class="fa fa-line-chart" style="color:teal"></i> WAEC Analysis</button></a>
+<?php if($_ModuleWaecAnalysis){ ?><a href="waec-analysis.php"><button><i class="fa fa-line-chart" style="color:teal"></i> WAEC Analysis</button></a><?php } ?>
 
 <a href="viewusers.php"><button><i class="fa fa-user" style="color:brown"></i> View Teachers</button></a>
 <a href="viewstudents.php"><button><i class="fa fa-user" style="color:maroon"></i> View Students</button></a>
