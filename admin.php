@@ -3,6 +3,7 @@ session_start();
 include_once("dashboard-student-utils.php");
 include_once("storekeeper-utils.php");
 include_once("portal-help-utils.php");
+include_once("module-settings-utils.php");
 
 if(isset($_POST['mark_changes_read'])){
     include("dbstring.php");
@@ -2157,6 +2158,7 @@ include("links.php");
                     <div class="form-entry admin-dashboard-panel">
                         <?php
                         include("dbstring.php");
+                        $_AdminUsesBoardingDashboard = school_module_is_enabled($con, 'boarding_houses');
                         include("audit_notifications.php");
                         ensureSystemChangeLogTable($con);
                         mysqli_query($con, "DELETE FROM tblsystemchangelog WHERE status='read' AND datetimeentry < (NOW() - INTERVAL 48 HOUR)");
@@ -2240,6 +2242,19 @@ include("links.php");
                         $boarding_total  = $boys_boarding + $girls_boarding;
                         $students_with_status_total = $boys_total + $girls_total;
                         $grand_total     = $students_total;
+
+                        if(!$_AdminUsesBoardingDashboard){
+                            $genderTotalsSql = mysqli_query($con, "SELECT
+                                SUM(CASE WHEN UPPER(TRIM(COALESCE(gender,''))) IN ('M','MALE','BOY','B') THEN 1 ELSE 0 END) AS boys_total,
+                                SUM(CASE WHEN UPPER(TRIM(COALESCE(gender,''))) IN ('F','FEMALE','GIRL','G') THEN 1 ELSE 0 END) AS girls_total,
+                                COUNT(*) AS total_pupils
+                                FROM tblsystemuser WHERE systemtype='Student' AND status='active'");
+                            if($genderTotalsSql && ($genderTotals = mysqli_fetch_assoc($genderTotalsSql))){
+                                $boys_total = (int)$genderTotals['boys_total'];
+                                $girls_total = (int)$genderTotals['girls_total'];
+                                $grand_total = (int)$genderTotals['total_pupils'];
+                            }
+                        }
 
                         $activeBatchNames = array();
                         $_SQL_ACTIVE_BATCH = mysqli_query($con, "SELECT batch FROM tblbatch WHERE status='active' ORDER BY datetimeentry DESC");
@@ -2899,11 +2914,12 @@ include("links.php");
                         <div class="dashboard-flex" role="region" aria-label="Student Distribution Dashboard">
                             <div class="chart-side">
                                 <div class="chart-container">
-                                    <canvas id="studentChart" width="280" height="280" aria-label="Student distribution by gender and residence"></canvas>
-                                    <p class="chart-note">Chart and summary tiles below show students with recognized Day or Boarding residence. Missing residence records are shown separately.</p>
+                                    <canvas id="studentChart" width="280" height="280" aria-label="Student distribution by <?php echo $_AdminUsesBoardingDashboard ? 'gender and residence' : 'gender'; ?>"></canvas>
+                                    <p class="chart-note"><?php echo $_AdminUsesBoardingDashboard ? 'Chart and summary tiles below show students with recognized Day or Boarding residence. Missing residence records are shown separately.' : 'Boarding is disabled, so this summary shows the school population by gender only.'; ?></p>
                                 </div>
                             </div>
                             <div class="cards-side">
+                                <?php if($_AdminUsesBoardingDashboard){ ?>
                                 <div class="card" role="article" aria-label="Boys Day Students">
                                     <h4><i class="fa fa-male" style="color:#2563eb; margin-right:4px;"></i>Boys - Day</h4>
                                     <p><?php echo number_format($boys_day); ?></p>
@@ -2929,8 +2945,18 @@ include("links.php");
                                     <p><?php echo number_format($students_no_status); ?></p>
                                     <?php echo dashboard_student_batch_breakdown_html($_AdminStudentBatchSummary, 'students_no_status', 'Batches', 'All set.'); ?>
                                 </div>
+                                <?php } else { ?>
+                                <div class="card" role="article" aria-label="Boys">
+                                    <h4><i class="fa fa-male" style="color:#2563eb; margin-right:4px;"></i>Boys</h4>
+                                    <p><?php echo number_format($boys_total); ?></p>
+                                </div>
+                                <div class="card" role="article" aria-label="Girls">
+                                    <h4><i class="fa fa-female" style="color:#db2777; margin-right:4px;"></i>Girls</h4>
+                                    <p><?php echo number_format($girls_total); ?></p>
+                                </div>
+                                <?php } ?>
                                 <div class="card total" role="article" aria-label="Total Active Students">
-                                    <h4><i class="fa fa-users" style="color:#fff; margin-right:4px;"></i>Total Active Students</h4>
+                                    <h4><i class="fa fa-users" style="color:#fff; margin-right:4px;"></i><?php echo $_AdminUsesBoardingDashboard ? 'Total Active Students' : 'Total Pupils'; ?></h4>
                                     <p><?php echo number_format($grand_total); ?></p>
                                 </div>
                             </div>
@@ -3371,11 +3397,11 @@ include("links.php");
                                 new Chart(ctx, {
                                     type: 'doughnut',
                                     data: {
-                                        labels: ['Boys Day', 'Boys Boarding', 'Girls Day', 'Girls Boarding', 'No Residence Status'],
+                                        labels: <?php echo $_AdminUsesBoardingDashboard ? "['Boys Day', 'Boys Boarding', 'Girls Day', 'Girls Boarding', 'No Residence Status']" : "['Boys', 'Girls']"; ?>,
                                         datasets: [{
                                             label: 'Student Count',
-                                            data: [<?php echo $boys_day; ?>, <?php echo $boys_boarding; ?>, <?php echo $girls_day; ?>, <?php echo $girls_boarding; ?>, <?php echo $students_no_status; ?>],
-                                            backgroundColor: ['#2563eb', '#38bdf8', '#db2777', '#f472b6', '#d59b2d'],
+                                            data: <?php echo $_AdminUsesBoardingDashboard ? "[$boys_day, $boys_boarding, $girls_day, $girls_boarding, $students_no_status]" : "[$boys_total, $girls_total]"; ?>,
+                                            backgroundColor: <?php echo $_AdminUsesBoardingDashboard ? "['#2563eb', '#38bdf8', '#db2777', '#f472b6', '#d59b2d']" : "['#2563eb', '#db2777']"; ?>,
                                             borderColor: '#fff',
                                             borderWidth: 2,
                                             hoverOffset: 16
@@ -3396,7 +3422,7 @@ include("links.php");
                                             },
                                             title: {
                                                 display: true,
-                                                text: 'Student Distribution by Gender & Residence Status',
+                                                text: <?php echo $_AdminUsesBoardingDashboard ? "'Student Distribution by Gender & Residence Status'" : "'Pupil Distribution by Gender'"; ?>,
                                                 font: { size: 16, weight: '600' },
                                                 color: '#111827',
                                                 padding: { top: 10, bottom: 20 }

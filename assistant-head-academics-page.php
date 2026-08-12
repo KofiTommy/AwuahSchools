@@ -10,6 +10,9 @@ include_once("report-approval-utils.php");
 include_once("course-registration-utils.php");
 include_once("dashboard-student-utils.php");
 include_once("storekeeper-utils.php");
+include_once("module-settings-utils.php");
+
+$_AcademicUsesBoardingDashboard = school_module_is_enabled($con, 'boarding_houses');
 
 ensure_student_attendance_tables($con);
 semester_registry_ensure_academic_year_column($con);
@@ -157,6 +160,12 @@ $boys_day = $residenceCounts['Male']['Day'];
 $boys_boarding = $residenceCounts['Male']['Boarding'];
 $girls_day = $residenceCounts['Female']['Day'];
 $girls_boarding = $residenceCounts['Female']['Boarding'];
+$boysTotal = $boys_day + $boys_boarding;
+$girlsTotal = $girls_day + $girls_boarding;
+if(!$_AcademicUsesBoardingDashboard){
+    $boysTotal = (int)aha_fetch_scalar($con, "SELECT COUNT(*) AS total FROM tblsystemuser su WHERE su.systemtype='Student' AND su.status='active' $branchUserFilter AND UPPER(TRIM(COALESCE(su.gender,''))) IN ('M','MALE','BOY','B')", 'total', 0);
+    $girlsTotal = (int)aha_fetch_scalar($con, "SELECT COUNT(*) AS total FROM tblsystemuser su WHERE su.systemtype='Student' AND su.status='active' $branchUserFilter AND UPPER(TRIM(COALESCE(su.gender,''))) IN ('F','FEMALE','GIRL','G')", 'total', 0);
+}
 
 $attendanceSessionsToday = (int)aha_fetch_scalar($con, "SELECT COUNT(*) AS total_sessions FROM tblstudentattendancesession WHERE attendancedate=CURDATE()", 'total_sessions', 0);
 $attendanceAssignments = (int)aha_fetch_scalar($con, "SELECT COUNT(*) AS total_assignments FROM tblclassteacher WHERE status='active'", 'total_assignments', 0);
@@ -341,21 +350,21 @@ include("links.php");
             <div class="hm-section__head">
                 <div>
                     <span class="hm-section__eyebrow">Dashboard Summary</span>
-                    <h2>Academic student breakdown and school totals</h2>
+                    <h2><?php echo $_AcademicUsesBoardingDashboard ? 'Academic student breakdown and school totals' : 'Pupil summary and school totals'; ?></h2>
                 </div>
             </div>
             <div class="dashboard-flex" role="region" aria-label="Assistant head academics summary dashboard">
                 <div class="chart-side">
                     <div class="chart-container">
                         <div class="chart-canvas-wrap">
-                            <canvas id="academicStudentChart" aria-label="Student distribution by gender and residence"></canvas>
+                            <canvas id="academicStudentChart" aria-label="Student distribution by <?php echo $_AcademicUsesBoardingDashboard ? 'gender and residence' : 'gender'; ?>"></canvas>
                         </div>
-                        <p class="chart-note">This graph shows student groups by gender and residence, while the tiles beside it keep the main academic totals close at hand.</p>
+                        <p class="chart-note"><?php echo $_AcademicUsesBoardingDashboard ? 'This graph shows student groups by gender and residence, while the tiles beside it keep the main academic totals close at hand.' : 'Boarding is disabled, so this graph shows pupils by gender only.'; ?></p>
                     </div>
                 </div>
                 <div class="cards-side">
                     <div class="card total" role="article" aria-label="Total Active Students">
-                        <h4><i class="fa fa-users" style="color:#fff; margin-right:4px;"></i>Total Active Students</h4>
+                        <h4><i class="fa fa-users" style="color:#fff; margin-right:4px;"></i><?php echo $_AcademicUsesBoardingDashboard ? 'Total Active Students' : 'Total Pupils'; ?></h4>
                         <p><?php echo number_format($studentTotal); ?></p>
                     </div>
                     <div class="card" role="article" aria-label="Active Teachers">
@@ -366,6 +375,7 @@ include("links.php");
                         <h4><i class="fa fa-building-o" style="color:#2563eb; margin-right:4px;"></i>Classes</h4>
                         <p><?php echo number_format($classTotal); ?></p>
                     </div>
+                    <?php if($_AcademicUsesBoardingDashboard){ ?>
                     <div class="card" role="article" aria-label="Boys Day Students">
                         <h4><i class="fa fa-male" style="color:#2563eb; margin-right:4px;"></i>Boys - Day</h4>
                         <p><?php echo number_format($boys_day); ?></p>
@@ -391,6 +401,16 @@ include("links.php");
                         <p><?php echo number_format($studentsNoStatus); ?></p>
                         <?php echo dashboard_student_batch_breakdown_html($_AcademicStudentBatchSummary, 'students_no_status', 'Batches', 'All set.'); ?>
                     </div>
+                    <?php } else { ?>
+                    <div class="card" role="article" aria-label="Boys">
+                        <h4><i class="fa fa-male" style="color:#2563eb; margin-right:4px;"></i>Boys</h4>
+                        <p><?php echo number_format($boysTotal); ?></p>
+                    </div>
+                    <div class="card" role="article" aria-label="Girls">
+                        <h4><i class="fa fa-female" style="color:#db2777; margin-right:4px;"></i>Girls</h4>
+                        <p><?php echo number_format($girlsTotal); ?></p>
+                    </div>
+                    <?php } ?>
                 </div>
             </div>
         </section>
@@ -637,17 +657,17 @@ document.addEventListener('DOMContentLoaded', function () {
             window.academicStudentChartInstance = new Chart(chartContext, {
                 type: 'bar',
                 data: {
-                    labels: [
+                    labels: <?php if($_AcademicUsesBoardingDashboard){ ?>[
                         ['Boys', 'Day'],
                         ['Boys', 'Boarding'],
                         ['Girls', 'Day'],
                         ['Girls', 'Boarding'],
                         ['No Residence', 'Status']
-                    ],
+                    ]<?php } else { ?>['Boys', 'Girls']<?php } ?>,
                     datasets: [{
                         label: 'Students',
-                        data: [<?php echo $boys_day; ?>, <?php echo $boys_boarding; ?>, <?php echo $girls_day; ?>, <?php echo $girls_boarding; ?>, <?php echo $studentsNoStatus; ?>],
-                        backgroundColor: ['#2563eb', '#38bdf8', '#db2777', '#f472b6', '#d59b2d'],
+                        data: <?php echo $_AcademicUsesBoardingDashboard ? "[$boys_day, $boys_boarding, $girls_day, $girls_boarding, $studentsNoStatus]" : "[$boysTotal, $girlsTotal]"; ?>,
+                        backgroundColor: <?php echo $_AcademicUsesBoardingDashboard ? "['#2563eb', '#38bdf8', '#db2777', '#f472b6', '#d59b2d']" : "['#2563eb', '#db2777']"; ?>,
                         borderRadius: 12,
                         borderSkipped: false,
                         maxBarThickness: 46
@@ -664,7 +684,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         },
                         title: {
                             display: true,
-                            text: 'Student Population by Group',
+                            text: <?php echo $_AcademicUsesBoardingDashboard ? "'Student Population by Group'" : "'Pupil Distribution by Gender'"; ?>,
                             font: { size: 15, weight: '600' },
                             color: '#111827',
                             padding: { top: 8, bottom: 16 }
