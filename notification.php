@@ -1,10 +1,10 @@
 <?php
 session_start();
-$_SESSION['Message']="";
 ?>
 <?php
 include("dbstring.php");
 include("code.php");
+include_once("house-master-utils.php");
 @$_MessageId=$code;
 @$_Message=$_POST['message'];
 $_UserId=(isset($_POST['userid']) && is_array($_POST['userid'])) ? $_POST['userid'] : array();
@@ -12,26 +12,35 @@ $_SelectedRecipient=isset($_POST["recipient"]) ? trim($_POST["recipient"]) : "";
 $_SelectedBatchId=isset($_POST["batchid"]) ? trim($_POST["batchid"]) : "";
 
 if(isset($_POST['send_message'])){
-		if(empty($_UserId))
-		{
-		$_SESSION['Message']="<div style='color:red'>No user selected</div>";
+		$_Message=trim((string)$_Message);
+		if(empty($_UserId)){
+			$_SESSION['Message']="<div class='notify-alert notify-alert--error'><i class='fa fa-exclamation-circle'></i> No user selected.</div>";
+		}
+		else if($_Message===""){
+			$_SESSION['Message']="<div class='notify-alert notify-alert--error'><i class='fa fa-exclamation-circle'></i> Enter a message before sending.</div>";
 		}
 		else{
-			foreach($_UserId as $selecteduser)
-			{	
-				$_Mobile="";
+			$_SentCount=0; $_FailedCount=0; $_NoMobileCount=0; $_NotFoundCount=0; $_FailureCodes=array();
+			$_UniqueUserIds=array_values(array_unique(array_filter(array_map('trim',$_UserId))));
+			foreach($_UniqueUserIds as $selecteduser){
 				$_SelectedUserSafe=mysqli_real_escape_string($con,$selecteduser);
-				//Get mobile number from users	
-				$_SQL_H=mysqli_query($con,"SELECT * FROM tblsystemuser su WHERE su.userid='$_SelectedUserSafe'");
-				if($rowm=mysqli_fetch_array($_SQL_H,MYSQLI_ASSOC)){
-				$_Mobile=$rowm["mobile"];
-				}
-				if($_Mobile!=""){
-					$message=$_Message;
-					$phone=$_Mobile;
-					include("bulksms/bulksms.php");
-				}
+				$_SQL_H=mysqli_query($con,"SELECT mobile FROM tblsystemuser WHERE userid='$_SelectedUserSafe' LIMIT 1");
+				if(!$_SQL_H || !($rowm=mysqli_fetch_array($_SQL_H,MYSQLI_ASSOC))){ $_NotFoundCount++; continue; }
+				$_Mobile=trim((string)$rowm["mobile"]);
+				if($_Mobile===""){ $_NoMobileCount++; continue; }
+				$_SmsCode="";
+				$_SentOk=send_bulk_sms_message($_Mobile,$_Message,$_SmsCode);
+				if($_SentOk){ $_SentCount++; }
+				else{ $_FailedCount++; $_CodeLabel=trim((string)$_SmsCode); if($_CodeLabel!==""){ $_FailureCodes[$_CodeLabel]=isset($_FailureCodes[$_CodeLabel])?$_FailureCodes[$_CodeLabel]+1:1; } }
 			}
+			$_Summary="Sent: <strong>".number_format($_SentCount)."</strong>";
+			if($_FailedCount>0){ $_Summary.=" | Failed: <strong>".number_format($_FailedCount)."</strong>"; }
+			if($_NoMobileCount>0){ $_Summary.=" | No mobile: <strong>".number_format($_NoMobileCount)."</strong>"; }
+			if($_NotFoundCount>0){ $_Summary.=" | Not found: <strong>".number_format($_NotFoundCount)."</strong>"; }
+			if(!empty($_FailureCodes)){ $_Summary.=" | Reason: ".htmlspecialchars(implode(", ",array_map(function($code,$count){ return $code." (".$count.")"; },array_keys($_FailureCodes),$_FailureCodes)),ENT_QUOTES,'UTF-8'); }
+			$_Tone=($_SentCount>0 && $_FailedCount===0 && $_NoMobileCount===0 && $_NotFoundCount===0)?"success":(($_SentCount>0)?"warning":"error");
+			$_Icon=$_Tone==="success"?"fa-check-circle":($_Tone==="warning"?"fa-exclamation-triangle":"fa-exclamation-circle");
+			$_SESSION['Message']="<div class='notify-alert notify-alert--".$_Tone."'><i class='fa ".$_Icon."'></i> SMS processing completed. ".$_Summary.".</div>";
 	   }
 }
 ?>
