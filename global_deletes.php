@@ -50,6 +50,7 @@ function gd_reset_operational_data($con) {
         'tblcurrency',
         'tblmodule',
         'tblaccounttype',
+        'tblapi',
         'tblsystemuser'
     );
 
@@ -110,7 +111,7 @@ if ($isAllowed && isset($_POST['confirm_reset'])) {
 }
 
 $previewTables = $isAllowed ? gd_get_base_tables($con) : array();
-$protectedPreview = array('tblcompany', 'tblbranch', 'tblcurrency', 'tblmodule', 'tblaccounttype', 'tblsystemuser');
+$protectedPreview = array('tblcompany', 'tblbranch', 'tblcurrency', 'tblmodule', 'tblaccounttype', 'tblapi', 'tblsystemuser');
 ?>
 <html>
 <head>
