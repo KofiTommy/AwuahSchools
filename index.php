@@ -293,6 +293,8 @@ if(isset($_Logo) && trim((string)$_Logo) !== ""){
 }
 ?>
 <body class="landing-page" style="--landing-photo:url('images/logo/<?php echo $_LandingBackgroundPhoto; ?>');">
+<a href="website.php" class="school-website-shortcut" aria-label="Visit the Awuah Preparatory School public website"><span aria-hidden="true">↗</span> Visit school website</a>
+<style>.school-website-shortcut{position:fixed;z-index:50;right:20px;bottom:96px;display:inline-flex;align-items:center;gap:9px;padding:12px 16px;border-radius:8px;background:#164239;color:#fff!important;font:700 13px Arial,sans-serif;text-decoration:none;box-shadow:0 8px 22px rgba(0,0,0,.24);transition:transform .2s,background .2s}.school-website-shortcut:hover{background:#0e3029;transform:translateY(-2px)}.school-website-shortcut span{color:#e3b650;font-size:18px;line-height:1}@media(max-width:600px){.school-website-shortcut{right:12px;bottom:82px;padding:10px 13px;font-size:12px}}</style>
 <div class="landing-shell">
     <div class="landing-currents" aria-hidden="true">
         <span class="landing-current landing-current--one"></span>
