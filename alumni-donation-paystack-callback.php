@@ -15,7 +15,7 @@ $stmt=mysqli_prepare($con,'SELECT * FROM tblalumnidonationpayment WHERE referenc
 if(!$payment)alumni_donation_callback_back('We could not match this payment to an Alumni donation.');
 if((string)($_SESSION['ALUMNI_MEMBER']??'')!==$payment['alumniid'])alumni_donation_callback_back('Please sign in to the Alumni account that started this donation.');
 $config=online_admission_paystack_config();
-if(!online_admission_paystack_is_ready($config))alumni_donation_callback_back('Online donations are not configured yet. Please contact AYISEC.');
+if(!online_admission_paystack_is_ready($config))alumni_donation_callback_back('Online donations are not configured yet. Please contact APOSA.');
 $error='';$response=online_admission_paystack_verify($config,$reference,$error);
 if($response===false||empty($response['data'])){
     $stmt=mysqli_prepare($con,"UPDATE tblalumnidonationpayment SET status='pending',gatewayresponse=? WHERE referenceid=?");$note=$error!==''?$error:'Verification could not be completed.';mysqli_stmt_bind_param($stmt,'ss',$note,$reference);mysqli_stmt_execute($stmt);mysqli_stmt_close($stmt);
@@ -27,5 +27,4 @@ if($paid&&$amountMatch&&$currencyMatch){
     if(!$alreadyRecorded)logExternalSystemChange($con,(string)$payment['donorname'],'Alumni','ALUMNI_DONATION_RECEIVED','Confirmed Alumni donation of GHS '.number_format((float)$payment['amount'],2).'.',(string)$payment['alumniid']);
     alumni_donation_callback_back('Thank you. Your donation has been received and recorded successfully.','success');
 }
-$status=$paid?'review':'failed';$note=$paid?'The payment details did not match the recorded donation. Please contact AYISEC.':(string)($data['gateway_response']??'Payment was not completed.');$stmt=mysqli_prepare($con,'UPDATE tblalumnidonationpayment SET status=?,gatewayresponse=? WHERE referenceid=?');mysqli_stmt_bind_param($stmt,'sss',$status,$note,$reference);mysqli_stmt_execute($stmt);mysqli_stmt_close($stmt);alumni_donation_callback_back($note,'error');
-
+$status=$paid?'review':'failed';$note=$paid?'The payment details did not match the recorded donation. Please contact APOSA.':(string)($data['gateway_response']??'Payment was not completed.');$stmt=mysqli_prepare($con,'UPDATE tblalumnidonationpayment SET status=?,gatewayresponse=? WHERE referenceid=?');mysqli_stmt_bind_param($stmt,'sss',$status,$note,$reference);mysqli_stmt_execute($stmt);mysqli_stmt_close($stmt);alumni_donation_callback_back($note,'error');

@@ -1,3 +1,4 @@
+<?php require_once("dbstring.php"); require_once("website-content-utils.php"); $apsWebsiteContent=aps_website_content($con); ob_start(); ?>
 <!doctype html>
 <html lang="en">
 <head>
@@ -15,7 +16,7 @@
   <div class="nav-wrap"><nav class="nav shell" aria-label="Main navigation">
     <a class="brand" href="#home" aria-label="Awuah Preparatory School home"><span class="brand-mark">APS</span><span class="brand-copy"><strong>Awuah Preparatory</strong><span>Brighten the corner</span></span></a>
     <button class="menu-button" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
-    <div class="nav-links"><a href="#about">About us</a><a href="#programmes">Learning</a><a href="#admissions">Admissions</a><a href="alumni.php">Alumni</a><a href="#contact">Contact</a><a class="nav-portal" href="index.php">Parent portal ↗</a></div>
+    <div class="nav-links"><a href="#about">About us</a><a href="#programmes">Learning</a><a href="#admissions">Admissions</a><a href="alumni.php">Old Students</a><a href="announcements.php">News</a><a href="#contact">Contact</a><a class="nav-portal" href="parent-portal.php">Portal login ↗</a></div>
   </nav></div>
   <main>
     <section class="hero" id="home"><img class="hero-image" src="images/awuah-preparatory-hero.png" alt="Pupils arriving at a welcoming school campus"><div class="shell"><div class="hero-copy"><span class="eyebrow">A place to belong and become</span><h1>Small steps.<br>Bright futures.</h1><p>Awuah Preparatory School is a warm learning community where every child is known, encouraged and inspired to grow with confidence.</p><div class="hero-actions"><a class="button gold" href="#admissions">Begin an enquiry</a><a class="button outline" href="#programmes">Explore learning</a></div><div class="hero-note"><b>✦</b> Building strong foundations for life-long learning.</div></div></div><aside class="hero-card"><small>Our guiding belief</small><p>Every child deserves to be seen, supported and challenged.</p></aside></section>
@@ -35,4 +36,4 @@
     document.getElementById('enquiry-form').addEventListener('submit', event => { event.preventDefault(); const toast = document.querySelector('.toast'); toast.classList.add('show'); event.currentTarget.reset(); setTimeout(() => toast.classList.remove('show'), 5000); });
   </script>
 </body>
-</html>
+</html><?php $apsWebsiteOutput=ob_get_clean(); $apsWebsiteOutput=str_replace(array("Welcome to the Awuah Preparatory School community.","Small steps.<br>Bright futures.","Awuah Preparatory School is a warm learning community where every child is known, encouraged and inspired to grow with confidence."),array(aps_website_escape($apsWebsiteContent["welcome_message"]),nl2br(aps_website_escape(str_replace("|",PHP_EOL,$apsWebsiteContent["hero_title"]))),aps_website_escape($apsWebsiteContent["hero_text"])),$apsWebsiteOutput); echo $apsWebsiteOutput; ?>

@@ -325,6 +325,7 @@ elseif($_SESSION['ACCESSLEVEL']=="user" && $_SESSION['SYSTEMTYPE']=="Teacher"){
 <?php if($_ModuleOnlineVoting){ ?><a href="online-voting.php"><button><i class="fa fa-trophy" style="color:#d97706"></i> Online Voting</button></a><?php } ?>
 <?php if($_ShowTeacherAttendanceLinks){ ?>
 <a href="student-attendance.php"><button><i class="fa fa-check-square-o" style="color:#0f766e"></i> Student Attendance</button></a>
+<a href="early-years-assessment.php"><button><i class="fa fa-child" style="color:#08766f"></i> Early Years Assessment</button></a>
 <a href="student-attendance-report.php"><button><i class="fa fa-bar-chart" style="color:#0f766e"></i> Attendance Summary</button></a>
 <?php } ?>
 <?php
@@ -336,6 +337,7 @@ if(!empty($_TeacherExtraAccessLinks)){
     }
 }
 ?>
+<a href="staff-permission-request.php"><button><i class="fa fa-calendar-plus-o" style="color:#08766f"></i> Request Staff Permission</button></a>
 <a href="logout.php"><button><i class="fa fa-power-off" style="color:red"></i> Logout </button></a>
 </div>
 <?php
@@ -380,6 +382,8 @@ elseif($_SESSION['ACCESSLEVEL']=="user" && $_SESSION['SYSTEMTYPE']=="Headmaster"
 <a href="online-admission-admin.php"><button><i class="fa fa-globe" style="color:#0ea5e9"></i> Online Admission</button></a>
 <a href="messages.php"><button><i class="fa fa-comments" style="color:#ea580c"></i> Message Box</button></a>
 <a href="notification.php"><button><i class="fa fa-bullhorn" style="color:#b45309"></i> Send Notification</button></a>
+<a href="staff-permission-review.php"><button><i class="fa fa-check-square-o" style="color:#08766f"></i> Review Staff Permission</button></a>
+<a href="staff-permission-request.php"><button><i class="fa fa-calendar-plus-o" style="color:#08766f"></i> Request Staff Permission</button></a>
 <a href="logout.php"><button><i class="fa fa-power-off" style="color:red"></i> Logout </button></a>
 </div>
 <?php
@@ -413,6 +417,8 @@ elseif($_SESSION['ACCESSLEVEL']=="user" && $_SESSION['SYSTEMTYPE']=="AssistantHe
 <?php if($_ModuleCourseRegistration){ ?><a href="course-registration-admin.php"><button><i class="fa fa-list-alt" style="color:#1d4ed8"></i> Course Registration</button></a><?php } ?>
 <a href="messages.php"><button><i class="fa fa-comments" style="color:#ea580c"></i> Message Box</button></a>
 <a href="notification.php"><button><i class="fa fa-bullhorn" style="color:#b45309"></i> Send Notification</button></a>
+<a href="staff-permission-review.php"><button><i class="fa fa-check-square-o" style="color:#08766f"></i> Review Staff Permission</button></a>
+<a href="staff-permission-request.php"><button><i class="fa fa-calendar-plus-o" style="color:#08766f"></i> Request Staff Permission</button></a>
 <a href="logout.php"><button><i class="fa fa-power-off" style="color:red"></i> Logout </button></a>
 </div>
 <?php
@@ -443,6 +449,8 @@ elseif($_SESSION['ACCESSLEVEL']=="administrator" && $_SESSION['SYSTEMTYPE']=="no
 <a href="transport-student-assignment.php"><button><i class="fa fa-map-marker" style="color:#0f766e"></i> Student Transport Assignment</button></a><?php } ?>
 <?php if($_ModuleDepartments){ ?><a href="department-result-approval.php"><button><i class="fa fa-check-square-o" style="color:#0f766e"></i> Department Result Approval</button></a><?php } ?>
 <a href="online-admission-admin.php"><button><i class="fa fa-globe" style="color:#0ea5e9"></i> Online Admission</button></a>
+<a href="website-editor.php"><button><i class="fa fa-pencil-square-o" style="color:#08766f"></i> Public Website Editor</button></a>
+<a href="parent-management.php"><button><i class="fa fa-users" style="color:#08766f"></i> Parent Portal Approvals</button></a>
 <?php if($_ModuleOnlineVoting){ ?><a href="online-voting-admin.php"><button><i class="fa fa-trophy" style="color:#d97706"></i> Online Voting</button></a><?php } ?>
 <?php if($_ModuleStudentChat){ ?><a href="student-chat-monitor.php"><button><i class="fa fa-eye" style="color:#0f766e"></i> Student Chat Monitor</button></a>
 <a href="student-chat-settings.php"><button><i class="fa fa-sliders" style="color:#0f766e"></i> Student Chat Control</button></a><?php } ?>
@@ -470,6 +478,7 @@ elseif($_SESSION['ACCESSLEVEL']=="administrator" && $_SESSION['SYSTEMTYPE']=="su
 <div id="admin" align="left" style="margin-top:5px;">
 <a href="edit-account.php"><button><i class="fa fa-user" style="color:brown"></i> Edit Profile</button></a>
 <a href="user-management.php"><button ><i class="fa fa-users" style="color:#1d4ed8"></i> User Management</button></a>
+<a href="staff-permission-review.php"><button><i class="fa fa-check-square-o" style="color:#08766f"></i> Review Staff Permission</button></a>
 <a href="module-settings.php"><button><i class="fa fa-toggle-on" style="color:#7c3aed"></i> Module Visibility</button></a>
 <a href="user-visit-history.php"><button><i class="fa fa-clock-o" style="color:#0f766e"></i> User Visit History</button></a>
 <a href="register-student.php"><button><i class="fa fa-user" style="color:royalblue"></i> Register Student</button></a>
@@ -484,6 +493,8 @@ elseif($_SESSION['ACCESSLEVEL']=="administrator" && $_SESSION['SYSTEMTYPE']=="su
 <?php if($_ModuleCourseRegistration){ ?><a href="course-registration-admin.php"><button><i class="fa fa-list-alt" style="color:#1d4ed8"></i> Course Registration</button></a><?php } ?>
 <a href="report-approval-board.php"><button><i class="fa fa-check-circle" style="color:#0f766e"></i> Report Approval</button></a>
 <a href="online-admission-admin.php"><button><i class="fa fa-globe" style="color:#0ea5e9"></i> Online Admission</button></a>
+<a href="website-editor.php"><button><i class="fa fa-pencil-square-o" style="color:#08766f"></i> Public Website Editor</button></a>
+<a href="parent-management.php"><button><i class="fa fa-users" style="color:#08766f"></i> Parent Portal Approvals</button></a>
 <?php if($_ModuleOnlineVoting){ ?><a href="online-voting-admin.php"><button><i class="fa fa-trophy" style="color:#d97706"></i> Online Voting</button></a><?php } ?>
 <?php if($_ModuleStudentChat){ ?><a href="student-chat-monitor.php"><button><i class="fa fa-eye" style="color:#0f766e"></i> Student Chat Monitor</button></a>
 <a href="student-chat-settings.php"><button><i class="fa fa-sliders" style="color:#0f766e"></i> Student Chat Control</button></a><?php } ?>
