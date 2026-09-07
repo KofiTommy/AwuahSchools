@@ -1,0 +1,9 @@
+# Show the public school website when visitors open the domain root.
+# The management portal and login remain available at /index.php.
+DirectoryIndex website.php index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # Compatibility path used by the imported Alumni pages.
+    RewriteRule ^logo/logo-transparent\.png$ logo/logo.png [L]
+</IfModule>

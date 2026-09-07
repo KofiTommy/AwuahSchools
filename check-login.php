@@ -29,6 +29,23 @@ else{
 }
 
 $__CurrentScript = basename((string)(isset($_SERVER['PHP_SELF']) ? $_SERVER['PHP_SELF'] : ''));
+
+/* Alumni students must complete activation before re-entering the regular portal. */
+if($__CurrentScript !== 'alumni-activate.php' && $__CurrentScript !== 'logout.php'){
+    $stmtAlumniStatus = @mysqli_prepare($con, "SELECT status FROM tblsystemuser WHERE userid=? LIMIT 1");
+    if($stmtAlumniStatus){
+        mysqli_stmt_bind_param($stmtAlumniStatus, 's', $_SESSION['USERID']);
+        mysqli_stmt_execute($stmtAlumniStatus);
+        $alumniStatusResult = mysqli_stmt_get_result($stmtAlumniStatus);
+        $alumniStatusRow = $alumniStatusResult ? mysqli_fetch_array($alumniStatusResult, MYSQLI_ASSOC) : null;
+        mysqli_stmt_close($stmtAlumniStatus);
+        if($alumniStatusRow && strtolower(trim((string)$alumniStatusRow['status'])) === 'alumni'){
+            header('location:alumni-activate.php');
+            exit();
+        }
+    }
+}
+
 if($__CurrentScript !== "change-password.php" && $__CurrentScript !== "logout.php"){
     $stmtUserReset = @mysqli_prepare($con, "SELECT password_reset_required FROM tblsystemuser WHERE userid=? LIMIT 1");
     if($stmtUserReset){
